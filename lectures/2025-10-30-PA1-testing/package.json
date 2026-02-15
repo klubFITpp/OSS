@@ -1,0 +1,16 @@
+{
+  "name": "prednaska",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test1": "vitest testing/testing1.spec.js",
+    "test3": "vitest testing/testing3.spec.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vitest": "^4.0.4"
+  }
+}

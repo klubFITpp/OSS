@@ -1,0 +1,334 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\usepackage{polyglossia}
+
+\setdefaultlanguage{czech}
+
+\usepackage{graphicx}
+\usepackage{tikz}
+\usepackage{biblatex}
+\usepackage{minted}
+\usepackage{xcolor}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{wasysym}
+
+\usepackage{lmodern}
+\usepackage{fontspec}
+\setmainfont{Latin Modern Roman} % or another font
+\setsansfont{TeX Gyre Heros}[SmallCapsFeatures={Letters=SmallCaps}]
+
+% \usetheme{Copenhagen}
+\usetheme{Berlin}
+
+\definecolor{FITBlue}{RGB}{0,115,188}
+\definecolor{FITYellow}{RGB}{249,176,0}
+
+\setbeamercolor{structure}{fg=FITBlue}
+\setbeamercolor{palette secondary}{bg=FITBlue}
+\setbeamercolor{palette tertiary}{fg=white,bg=FITYellow}
+
+% Sources
+\addbibresource{sources.bib}
+
+\title{DML - 2. test}
+\author{Klub FIT++}
+\date{2025}
+
+\begin{document}
+
+\maketitle
+
+\section{Indukce}
+
+\begin{frame}{Matematické důkazy}
+
+\begin{itemize}
+  \item Důkaz protipříkladem \begin{itemize}
+      \item "$2^x - 1$ je prvočíslo" - $1, 3, 7, \textbf{15}$ \lightning
+    \end{itemize}
+  \item Přímý důkaz \begin{itemize}
+      \item ukážu ekvivalenci, nerovnost ($x = \sqrt{25} = 5$)
+    \end{itemize}
+  \item Důkaz sporem \begin{itemize}
+      \item Pokud neplatí opak, pak musí platit původní tvrzení
+      \item $\neg (A \Leftrightarrow \neg B)$ je to samé jako $A \Leftrightarrow B$
+    \end{itemize}
+  \item Důkaz rozborem případů \begin{itemize}
+    \item Prakticky důkaz sporem
+    \item Kořeny kvadratické rovnice ($x < 0$, $x = 0$, $x > 0$)
+  \end{itemize}
+  \item \textbf{Matematická indukce}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Matematická indukce}
+
+\begin{itemize}
+  \item Podobné jako rekurentní rovnice (Fib. posloupnost, geometrická řada)
+  \item Ukážeme že platí pro prvních pár případů ($p(1), p(2)$) \begin{itemize}
+    \item \textit{"Triviálně ověříme že platí pro 1, 2"}
+  \end{itemize}
+  \item Pak obecně dokazujeme implikaci ($p(n) \Rightarrow p(n + 1)$)
+  \item Využíváme předpoklad $p(n)$, tedy v některý moment provádíme substituci,
+    nebo se jinak odvoláme na předpoklad.
+  \item Pozor na indexy - $\mathbb{N} \text{ vs } \mathbb{N}_0$ (začínám v 1? 0?
+    -1? dokazuju pro negativní čísla??)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+
+\begin{definition}[Fibonacciho posloupnost]
+  $f_0 := 0$ \\ 
+  $f_1 := 1$ \\
+  $f_n := f_{n - 1} + f_{n - 2}$
+\end{definition}
+
+\begin{problem}
+  Dokažte, že pro Fibonacciho posloupnost platí $f_n > \alpha^{n - 2}$ pro $\forall n \geq 3, \alpha = \frac{1 + \sqrt{5}}{2}$
+
+  Z DML skript\cite{courses:DMLfib}
+\end{problem}
+
+\end{frame}
+
+\begin{frame}
+
+Triviálně ověříme, že tvrzení platí pro $n = 3$, $n = 4$:
+
+\[
+  f_3 = 2 > \alpha^1 = \frac{1 + \sqrt{5}}{2} \doteq 1.618
+\]
+\[
+  f_4 = 3 > \alpha^2 = \frac{(1 + \sqrt{5})^2}{2^2} = \frac{1 + 2\sqrt{5} + 5}{4} = 1 + \frac{2 + 2\sqrt{5}}{4} = 1 + \frac{2 + \sqrt{5}}{2}
+\]
+
+\hspace{1em}
+
+Nyní se snažíme dokázat, že za předpokladu, že pokud pro $n > 4$ platí $f_n > \alpha^{n - 2}$ a $f_{n - 1} > \alpha^{n - 3}$, platí i $f_{n + 1} > \alpha^{n - 1}$.
+
+\[
+  f_{n + 1} = f_n + f_{n - 1} \overset{IP}{>} \alpha^{n - 2} + \alpha^{n - 3} = \alpha^{n - 3}(\alpha + 1) = \alpha^{n - 3}(\alpha^2) = \alpha^{n - 1}
+\]
+
+Tedy vidíme, že $f_{n + 1} > \alpha^{n - 1}$ \qed
+
+\end{frame}
+
+\begin{frame}{Počítejte příklady}
+
+\begin{itemize}
+  \item Na FITu se vše jede přes důkazy - zkuste se s důkazy zkamarádit
+  \item Indukci neutečete, semtam přímý důkaz prostě není jednoduchý najít
+  \item Představte si, že problém vysvětlujete malému dítěti, které tématu nerozumí
+  \item Zeptejte se spolužáků, zeptejte se svičících. Ostatní jsou víc kritičtí než vy
+\end{itemize}
+
+
+\end{frame}
+
+\section{Množiny a zobrazení}
+
+\begin{frame}{Množina vs Uspořádaná n-tice}
+
+\begin{itemize}
+  \item Ve množinách neřešíme pořadí prvků \begin{itemize}
+      \item $\{A, B, C\} = \{C, A, B\}$
+      \item Vnímáme operace jako "obsahuje prvek", průnik, sjednocení, doplněk...
+    \end{itemize}
+  \item Ve uspořádaných n-ticích pořadí řešíme \begin{itemize}
+      \item $(A, B, C) \neq (C, A, B)$
+      \item Vnímáme jako spoustu věcí (BI-AAG, BI-AG1), spíš než s celkem pracujeme s jednotlivými prvky.
+      \item BI-LA1: Pokud vnímáme n-tici jako vektor, operace škálování (násobení) skalárem
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Množinové vztahy}
+
+\begin{itemize}
+  \item Podmnožina $A \subseteq B$ \begin{itemize}
+    \item<2-> vše co je v A je i v B
+    \item<2-> $(\forall x \in \mathit{U})(x \in A \Rightarrow x \in B)$
+  \end{itemize}
+  \item Rovnost $A = B$ \begin{itemize}
+    \item<3-> vše co je v A je v B a vše co je v B je v a
+    \item<3-> $A \subseteq B \land B \subseteq A$
+  \end{itemize}
+  \item Vlastní podmnožina $A \varsubsetneq B$ \begin{itemize}
+    \item<4-> A je podmnožina B ale není rovna
+    \item<4-> $A \subseteq B \land A \neq B$
+  \end{itemize}
+  \item Potenční množina $\mathit{P}(A)$ \begin{itemize}
+    \item<5-> Množina všech podmnožin A
+    \item<5-> $\{X \subseteq \mathit{U}| X \subseteq A\}$
+    \item<5-> POZOR! je to \textbf{množina množin}
+  \end{itemize}
+  \item \small{Definice ze skript\cite{courses:DMLsets}}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Množinové operace}
+
+\begin{itemize}
+  \item Množinový doplněk $\overline{A}$ (v univerzu $\mathit{U}$) \begin{itemize}
+      \item<2-> $\{x \in \mathit{U}; x \notin A\}$
+    \end{itemize}
+  \item Průnik množin $A \cap B$ \begin{itemize}
+      \item<3-> $\{x \in \mathit{U}; x \in A \land x \in B\}$
+    \end{itemize}
+  \item Sjednocení množin $A \cup B$ \begin{itemize}
+      \item<4-> $\{x \in \mathit{U}; x \in A \lor x \in B\}$
+    \end{itemize}
+  \item Rozdíl množin $A \backslash B$ \begin{itemize}
+      \item<5-> $\{x \in \mathit{U}; x \in A \land x \notin B\}$
+    \end{itemize}
+  \item Kartézský součin $A \times B$ \begin{itemize}
+      \item<6-> $\{(a, b); a \in A \land b \in B\}$
+      \item<7-> POZOR! je to \textbf{množina uspořádaných dvojic}
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Množina množin uspořádaných dvojic množin čísel}
+
+\begin{itemize}
+  \item Množiny a n-tice mohou být vnořené kolikrát chceme
+  \item $\{\{(\emptyset, \{42\})\}, \{(\{1,2 3\}, \{4, 5\})\}\}$
+  \item $\emptyset = \{\}, \emptyset \notin \{\}, \emptyset \in \{\emptyset\}$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Zobrazení}
+
+\begin{itemize}
+  \item Znáte \begin{itemize}
+    \item funkce $f(x) = 3x + 5$ ($\mathbb{R} \mapsto \mathbb{R}$)
+    \item posloupnosti $a_0 = 0, a_n = a_{n - 1} + 5$ ($\mathbb{N} \mapsto \mathbb{R}$)
+  \end{itemize}
+  \item Přiřazujeme ke každému prvku \textbf{$D_f$} jeden prvek \textbf{$H_f$}
+  \item $f: A \mapsto B$ \\
+    $f(x) = y$, $f(5) = 1$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Speciální zobrazení}
+
+\begin{itemize}
+  \item Injektivní (prosté) \begin{itemize}
+    \item<2-> $(\forall x,y \in A)(f(x) = f(y) \Rightarrow x = y)$
+    \item<2-> $(\forall x,y \in A)(x \neq y\Rightarrow f(x) \neq f(y) )$
+  \end{itemize}
+  \item Surjektivní (na) \begin{itemize}
+    \item<3-> $(\forall y \in B)(\exists x \in A)(y = f(x))$
+  \end{itemize}
+  \item Bijektivní (bijekce) \begin{itemize}
+    \item<4-> zobrazení je zároveň injektivní a surjektivní
+  \end{itemize}
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Mohutnost množiny}
+
+\begin{itemize}
+  \item "počet prvků", ale obecnější
+  \item Pokud existuje $f: A \mapsto B$ je injektivní, pak $|A| \leq |B|$
+  \item Pokud existuje $f: A \mapsto B$ je bijekce, pak $|A| = |B|$
+  \item Toto pak platí obecně, i pro spočitatelné / nespočitatelné nekonečno
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Mohutnost $\mathbb{R}, \mathbb{Q}, \mathbb{Z}, \mathbb{N}$}
+
+\begin{itemize}
+  \item $|\mathbb{N}| = |\mathbb{Z}|$
+  \item $|\mathbb{Z}| = |\mathbb{Q}|$
+  \item $|\mathbb{Q}| \neq |\mathbb{R}|$
+  \item $|\mathbb{N}| = |\mathbb{Q}|$?
+  \item $|\mathbb{N}| = |\{(a, b); a,b \in \mathbb{N}\}|$?
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Příklady}
+
+\begin{itemize}
+  \item $A \backslash B = A \cap \overline{B}$?
+  \item $A \cap (B \backslash A) = \emptyset$?
+  \item $A \cup (B \backslash A) = A \cup B$?
+
+  \item $f(n) = 13n, f: \mathbb{Z} \mapsto \mathbb{Z}$ - injektivní / surjektivní / bijektivní?
+  \item $f(n) = 13n, f: \mathbb{R} \mapsto \mathbb{R}$ - injektivní / surjektivní / bijektivní?
+  \item $f(n) = n^2, f: \mathbb{Z} \mapsto \mathbb{Z}$ - injektivní / surjektivní / bijektivní?
+
+  \item Příklady z courses\cite{courses:DMLsetexercises}
+\end{itemize}
+
+\end{frame}
+
+\section{Teorie čísel}
+
+\begin{frame}
+
+\begin{itemize}
+  \item Jelikož slides na Teorii čísel nakonec byly použity naprosto minimálně, zde se odkazujeme na courses
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{ČVOZ}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.5\textwidth]{cvoz.jpg}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Příklady na Teorii čísel}
+
+\begin{itemize}
+  \item Najděte $\gcd(420, 231)$
+  \item Jsou-li $a, b$ sudá celá čísla, pak $\gcd(a, b) = 2 \gcd (\frac{a}{2}, \frac{b}{2})$
+  \item Je-li $a$ sudé a $b$ liché, pak $\gcd(a, b) = \gcd(\frac{a}{2}, b)$
+
+  \item Vyřešte $3x + 6y = 2$
+  \item Vyřešte $3x + 6y = 9$
+
+  \item Vyřešte $4^{44} \mod{13}$
+  \item Vyřešte $5^{55} \mod{17}$
+
+  \item Příklady z courses\cite{courses:DMLnumbertheoryexercises}
+\end{itemize}
+
+\end{frame}
+
+\section{To je konec!}
+
+\begin{frame}
+
+\begin{itemize}
+  \item Zopakujte si všechno. Pusťte si prosemináře!
+  \item Zkuste si napsat pár důkazů... I ty jednoduché pomůžou naučit se dokazovat
+  \item Hodně štěstí na zápočtu a u zkoušek!
+  \item Přijďte na Karaoke!
+\end{itemize}
+
+\end{frame}
+
+\printbibliography
+
+\end{document}

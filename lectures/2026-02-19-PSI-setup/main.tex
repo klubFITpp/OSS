@@ -1,0 +1,104 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\usepackage{polyglossia}
+\setdefaultlanguage{czech}
+
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{biblatex}
+\usepackage{minted}
+\usepackage{xcolor}
+
+% \usetheme{Copenhagen}
+\usetheme{Berlin}
+
+\definecolor{FITBlue}{RGB}{0,115,188}
+\definecolor{FITYellow}{RGB}{249,176,0}
+
+\setbeamercolor{structure}{fg=FITBlue}
+\setbeamercolor{palette secondary}{bg=FITBlue}
+\setbeamercolor{palette tertiary}{fg=white,bg=FITYellow}
+
+% Sources
+% \addbibresource{sources.bib}
+
+\title{PSI: Jak na laborky}
+\author{Klub FIT++}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+
+\section{Něco málo na začátek}
+
+\begin{frame}{Motivace}
+
+\begin{itemize}
+  \item Málo úložiště - "vzdálený přístup"
+  \item Pomalé procesory - více uživatelů na jednom "mainframe"
+  \item Multiplayer hry, webové aplikace
+  \item Co je to VPN? Jak se doopravdy schovat?
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Protokoly}
+
+\begin{itemize}
+  \item "a.b.c.d:25565" magický text, který určí na jaký MC server se připojím
+  \item "play.hypixel.net", funguje místo IP adres
+  \item Wi-Fi zadám heslo a vše magicky funguje (kromě eduroam)
+  \item Vše funguje na Apple, Samsungu, MikroTiku, Huawei
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Protokoly}
+
+\begin{itemize}
+  \item Domluva mezi výrobci a vývojáři, jak se co dělá
+    \begin{itemize}
+      \item Jak jsou uspořádané 1/0 co posíláme, jaká je frekvence přenosu...
+      \item Jak by měl vypadat postup dekódování/práce s informacemi
+      \item Co dělat, když data přijdou poškozená/nesprávná
+    \end{itemize}
+  \item Backward/Forward kompatibilita
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Analogie}
+
+\begin{itemize}
+  \item Posílání balíčku
+    \begin{itemize}
+      \item Podpis - od, pro
+      \item Obálka - adresa odesílatele, příjemce
+      \item Poštovní vůz/letadlo - město odesílatele/příjemce
+    \end{itemize}
+  \item Zprávu zabalujeme do "balíčků"
+  \item V sítích se toto děje vlastně naopak
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Digitálněji}
+
+\begin{itemize}
+  \item dopis předává Alice Bobovi
+    \begin{itemize}
+      \item dopis se posílá z Prahy do Brna
+        \begin{itemize}
+          \item jde o odpověď na předchozí korespondenci s předmětem...
+          \item text je "ahoj světe"
+        \end{itemize}
+    \end{itemize}
+  \item zaměnte dopis za Email
+\end{itemize}
+
+\end{frame}
+
+\printbibliography[title={Zdroje}]
+
+\end{document}

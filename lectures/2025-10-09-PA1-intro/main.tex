@@ -1,0 +1,493 @@
+\documentclass{beamer}
+\setbeamertemplate{navigation symbols}{}
+
+\usetheme{Copenhagen}
+\useoutertheme{miniframes}
+
+\makeatletter
+\setbeamertemplate{headline}{%
+  \begin{beamercolorbox}[wd=\paperwidth]{section in head/foot}
+    \vskip2pt%
+    \insertnavigation{\paperwidth}%
+    \vskip2pt%
+  \end{beamercolorbox}%
+}
+\makeatother
+
+\usepackage{xcolor}
+\usepackage{adjustbox} 
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{xurl}
+% \usepackage{tikz}
+\usepackage{ulem}
+\usepackage{minted}
+
+\usepackage{polyglossia}
+
+\setdefaultlanguage{czech}
+
+
+\definecolor{FITBlue}{RGB}{0,115,188}
+\definecolor{FITYellow}{RGB}{249,176,0}
+
+\setbeamercolor{structure}{fg=FITBlue}
+\setbeamercolor{palette secondary}{bg=FITBlue}
+\setbeamercolor{palette tertiary}{fg=white,bg=FITYellow}
+
+
+\setbeamertemplate{itemize item}{\raise1pt\hbox{\textbullet}}
+\setbeamertemplate{itemize subitem}{\raise1pt\hbox{\textopenbullet}}
+
+\setbeamercolor{itemize item}{fg=FITBlue}
+\setbeamercolor{itemize subitem}{fg=gray!80!black}
+
+\setbeamertemplate{enumerate item}{%
+  \tikz[baseline=(n.base)]\node[fill=FITBlue, text=white, circle, inner sep=1pt, minimum size=1.2em](n){\footnotesize\bfseries\insertenumlabel};}
+
+\setbeamertemplate{enumerate subitem}{%
+  \tikz[baseline=(n.base)]\node[fill=gray!80!black, text=white, circle, inner sep=1pt, minimum size=1em](n){\footnotesize\insertenumlabel};}
+
+
+\makeatletter
+\newlength\beamerleftmargin
+\setlength\beamerleftmargin{\Gm@lmargin}
+\makeatother
+
+
+\title{PA1 Konzultace}
+\author{Klub FIT++}
+\date{20. listopadu 2025}
+\begin{document}
+
+\maketitle
+
+\section{Pointery}
+
+\begin{frame}{Co jsou to pointery?}
+
+\begin{itemize}
+    \item \sout{jedničky a nuly, hvězdička} Datový typ
+    \item \texttt{int*, double*, struct my\_data\_t*, long long**}
+    \item Pointer aritmetika (+ 1 přičítá víc než jen 1)
+    \item Speciální operace "dereference" \texttt{*variable, variable->xyz}
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}{Reprezentace pointerů}
+
+\begin{itemize}
+    \item "odkaz na proměnnou"
+    \item adresa kde doopravdy proměnnou hledat
+    \item adresa $0$ (\texttt{NULL}) se vnímá jako "nic zde není"
+    \item pozor na na neplatné odkazy (neinicializované proměnné, zastaralá hodnota)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Jak s pointery pracovat?}
+
+\begin{minted}{C}
+
+int main() {
+    int x = 1234;
+
+    int *ptr = &x;
+
+    printf("%d", *ptr);
+}
+
+\end{minted}
+    
+\end{frame}
+
+\begin{frame}[fragile]{Praktické použití pointerů}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+int load_point(int *x, int*y);
+
+int main() {
+    int x = 0;
+    int y = 0;
+
+    if (load_point(&x, &y) != 0) {
+        printf("Chybný vstup.\n");
+        return;
+    }
+}
+
+int load_point(int *x, int*y) {
+    if (!x || !y) // if x or y is invalid pointer
+        return 1;
+    char c = 0;
+
+    ...
+}
+
+\end{minted}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+int load_point(int *x, int*y) {
+    if (!x || !y) // if x or y is invalid pointer
+        return 1;
+    char c = 0;
+
+    int res = scanf(" [ %d , %d %c ", x, y, &c);
+
+    if (*x < 0)
+        *x = (-1) * (*x);
+        
+    if (*y < 0)
+        *y = (-1) * (*y);
+
+    // Error
+    if (c != '[' || res != 3)
+        return 2;
+
+    return 0;
+}
+\end{minted}
+}
+
+
+\end{frame}
+
+\begin{frame}[fragile]{Neplatné pointery}
+
+\begin{minted}{C}
+
+int load_point(int *x, int*y) {
+    if (!x || !y) // if x or y is invalid pointer
+        return 1;
+    ...
+}
+
+int main() {
+    int *x; // x is uninitialized => random address
+    int *y; // x will be truthy, but *x throws error
+
+    if (load_point(&x, &y) != 0) {
+        printf("Chybný vstup.\n");
+        return;
+    }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Neplatné pointery}
+
+\begin{minted}{C}
+
+int *get_constant() {
+    int abc = 123;
+
+    // We return pointer, but it outlives the variable
+    return &abc;
+}
+
+int main() {
+    int *abc = get_constant();
+
+    // abc has correct value but might
+    // already be overwritten by something else
+    printf("%d\n", *abc);
+}
+\end{minted}
+
+\end{frame}
+
+\section{Struktury}
+
+\begin{frame}{Struktury}
+
+\begin{itemize}
+    \item Často naše proměnná vyžaduje "kontext"
+    \item Logické uspořádání více proměnných pod jednu
+    \item "Uživatel", "Bod", "Vektor", jiná datová struktura - Halda, AVL strom...
+\end{itemize}
+    
+\end{frame}
+
+\begin{frame}[fragile]
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+char nth_character(
+  char str[],
+  size_t length,
+  size_t index) {
+    if (index > length)
+        return -1;
+
+    return char[index];
+}
+
+int vec_push_int(
+  int (*vec)[],
+  size_t *size,
+  size_t *capacity,
+  int value) {
+    if (*size >= *capacity) { ... }
+    (*vec)[*size] = value;
+    *size += 1;
+
+    return 0;
+}
+
+\end{minted}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]{Příklad použití}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+typedef struct point_t {
+    int m_x;
+    int m_y;
+} point_t;
+
+void example_fn(point_t pt) {
+    // work with pt.m_x, pt.m_y...
+}
+
+int main() {
+    point_t mypoint;
+    mypoint.m_x = 1;
+    mypoint.m_y = 2;
+
+    example_fn(mypoint);
+}
+    
+\end{minted}
+}
+    
+\end{frame}
+
+\begin{frame}[fragile]{Pozor na inicializaci}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+typedef struct point_t {
+    int m_x;
+    int m_y;
+} point_t;
+
+void main() {
+    point_t mypoint;
+
+    if (mypoint.m_x > 0) { // Maybe true
+        // ...
+    }
+}
+
+typedef struct user_t {
+    size_t m_id;
+    // can be initialized to random address...
+    char p_username[];
+} user_t;
+    
+\end{minted}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]{Nejoptimálnější využívání}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+typedef struct vec_int_t {
+  int *p_data;
+  size_t m_size;
+  size_t m_capacity;
+}
+
+int init_vec_int(vec_int_t *vec) {
+    if (!vec)
+        return -1;
+    vec->m_size = 0;
+    vec->m_capacity = 8;
+    
+    vec->p_data = (int *) malloc(...);
+    if (!vec->p_data) {
+      vec->m_capacity = 0;
+      return -1;
+    }
+
+    return 0;
+}
+
+\end{minted}
+}
+
+\end{frame}
+
+\begin{frame}[fragile]
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+void delete_vec_int(vec_int_t *vec) {
+    if (!vec)
+        return;
+
+    free(vec->p_data);
+    vec->p_data = 0;
+    vec->m_size = 0;
+    vec->m_capacity = 0;
+}
+
+int main() {
+    vec_int_t vec;
+    if (!init_vec_int(&vec)) {
+        return -1; // add error message?
+    }
+
+    // safely use vec
+    delete_vec_int(&vec);
+}
+
+\end{minted}
+}
+\end{frame}
+
+\section{Dynamická alokace}
+
+\begin{frame}[fragile]{Zpátky k pointerům}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+int *get_constant() {
+    int abc = 123;
+
+    // How to actually make it so that the
+    // value can be returned (and still be a pointer)
+    // value can be returned (and still be a pointer)
+    return &abc;
+}
+
+int main() {
+    int *abc = get_constant();
+
+    // abc might already be overwritten by something else
+    printf("%d\n", *abc);     
+}
+\end{minted}
+}
+    
+\end{frame}
+
+\begin{frame}[fragile]{Problém vyřešen}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+int *get_constant() {
+    int *abc_ptr = (int *) malloc(sizeof(int));
+    if (abc_ptr)
+        *abc_ptr = 123;
+
+    return abc_ptr;
+}
+
+int main() {
+    int *abc = get_constant();
+
+    if (!abc) { ... }
+
+    printf("%d\n", *abc);
+
+    // Teď ale musíme manuálně říct, kdy abc už nepotřebujeme
+    free(abc);
+}
+    
+\end{minted}
+}
+    
+\end{frame}
+
+\begin{frame}{malloc/free}
+
+\begin{itemize}
+    \item malloc - "žádáme systém o n bytů místa pro libovolnou proměnnou"
+    \item Tato proměnná je ale "za" pointerem. tj. přežije return funkce
+    \item Abychom nevyplýtvali paměť musíme proměnnou zase vrátit (free)
+    \item Ale nesmíme vrátit stejnou proměnnou dvakrát.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Užitečný příklad}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+typedef struct int_arr_t {
+    size_t m_size;
+    size_t m_last;
+    int *p_data;
+} int_arr_t;
+
+int create_int_arr(int_arr_t *arr, size_t size) {
+    int *ptr = (int *) malloc(size * sizeof(int));
+    if (!ptr)
+        return -1;
+
+    arr->m_size = size;
+    arr->m_last = 0;
+    arr->p_data = ptr;
+
+    return 0;
+}
+
+\end{minted}
+}
+    
+\end{frame}
+
+\begin{frame}[fragile]{}
+
+{\small
+\begin{minted}[baselinestretch=0.8]{C}
+
+typedef struct int_arr_t {
+    size_t m_size;
+    size_t m_last;
+    int *p_data;
+} int_arr_t;
+
+void delete_int_arr(int_arr_t *arr) {
+    if (!arr)
+        return;
+
+    arr->m_size = 0;
+    arr->m_last = 0;
+    free(arr->p_data);
+    arr->p_data = NULL;
+}
+
+\end{minted}
+
+}
+
+\end{frame}
+
+\end{document}
