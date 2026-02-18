@@ -15,4 +15,4 @@
 *.toc
 *.vrb
 _minted/
-
+target/
