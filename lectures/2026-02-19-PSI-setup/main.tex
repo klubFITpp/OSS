@@ -3,6 +3,8 @@
 \usepackage{polyglossia}
 \setdefaultlanguage{czech}
 
+\usepackage{hyperref}
+
 \usepackage{tikz}
 \usepackage{amsmath}
 \usepackage{biblatex}
@@ -20,7 +22,7 @@
 \setbeamercolor{palette tertiary}{fg=white,bg=FITYellow}
 
 % Sources
-% \addbibresource{sources.bib}
+\addbibresource{sources.bib}
 
 \title{PSI: Jak na laborky}
 \author{Klub FIT++}
@@ -96,6 +98,80 @@
     \end{itemize}
   \item zaměnte dopis za Email
 \end{itemize}
+
+\end{frame}
+
+\begin{frame}{Konečně jak to je v sítích?}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{encapsulation.png}
+    \caption{Data jsou schované uvnitř segmentů+packetů+framů (resp. jejich hlavičkách)\cite{wiki:encapsulation}}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Konečně jak to je v sítích?}
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{frame.png}
+    \caption{Ethernetový frame - Na rozeznání, že jde o Ethernet frame hledáme Preamble, co je uvnitř říká Ethertype.\cite{wiki:ethernet}}
+\end{figure}
+
+\end{frame}
+
+\section{GNS3 - Instalace a ukázka}
+
+\begin{frame}{Co je GNS3}
+
+\begin{itemize}
+  \item Síťový hardware často vypadá jinak než typické počítače
+  \item GNS3 je simulátor tohoto hardwaru
+  \item Jendnotlivé síťové prvky používají reálný software
+  \item Instalace na \href{https://courses.fit.cvut.cz/BI-PSI/labs/tasks_home_study/manuals/manual-gns3.html}{courses}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{IP adresy, rozsahy}
+
+\begin{itemize}
+  \item Jak bylo zmíněno, IPv4 má 4 oktety a.b.c.d
+  \item Směrovací identifikátor, používán na 3. vrstvě
+  \item Typicky nechceme nastavovat pravidla pro každou IP - proto rozsahy
+  \item a.b.c.d/e ($0 \leq e \leq 32$) - kolik bitů se v IP nesmí měnit, aby zůstala v rozsahu (zleva)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Spočítání rozsahu}
+
+\begin{itemize}
+  \item \textt{192.168.0.55/24}
+  \item \textt{11000000.10101000.00000000.00110111/24}
+  \item \textt{{\color{red} 11000000.10101000.00000000} 00110111/ {\color{red}24}}
+  \item \textt{{\color{red} 11000000.10101000.00000000} {\color{blue} 00000000}}
+  \item \textt{{\color{red} 11000000.10101000.00000000} {\color{brown} 11111111}}
+  \item \textt{192.168.0.{\color{blue}0} - 192.168.0.{\color{brown}255}}
+  \item První a poslední adresa je rezervovaná$^*$
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Nyní k GNS3}
+
+\centering
+\large
+Nyní k GNS3
+
+\end{frame}
+
+\begin{frame}{Dotazy}
+
+\centering
+\large
+Dotazy?
 
 \end{frame}
 
