@@ -23,17 +23,7 @@ jobs:
       - name: Install TeX Live and LuaLaTeX
         uses: xu-cheng/texlive-action@v2
         with:
-          scheme: medium
-          pkgs: |
-            latexmk
-            luatex
-            beamer
-            biblatex
-            biber
-            fontspec
-            minted
-            xurl
-            upquote
+          scheme: full
           run: |
             make all
 
