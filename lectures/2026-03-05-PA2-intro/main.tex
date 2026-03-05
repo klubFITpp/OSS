@@ -118,10 +118,10 @@
 \begin{minted}[fontsize=\small]{C}
 
 int create_player(player_t *player) {
-  player.name = malloc(...);
-  player.health = 3;
-  player.damage = 5;
-  player.state = ON_GROUND;
+  player->name = (char*)malloc(...);
+  player->health = 3;
+  player->damage = 5;
+  player->state = ON_GROUND;
 
   return 0;
 }
@@ -196,8 +196,8 @@ int main(int argc, char **argv) {
           return player;
         }
         void Player::del() {
-          delete player.name;
-          player.name = nullptr;
+          delete[] name;
+          name = nullptr;
         }
       \end{minted}
   \end{column}
@@ -232,7 +232,7 @@ class Player {
   Player &heal(unsigned int amount) {
     unsigned int newhealth = this->health + amount;
     if (newhealth > 3) {
-      return;
+      return *this;
     }
     if (newhealth == 0) {
       printf("Player died!\n");
@@ -322,7 +322,7 @@ class Player {
 class Player {
   ...
   ~Player() {
-    delete this->name;
+    delete[] this->name;
     this->name = nullptr;
   }
 }
@@ -427,7 +427,7 @@ int main() {
 int main() {
   int *numptr = new int(1);
   int *myarr = new int[5]{1, 2, 3};
-  Player *plr = new Player();
+  Player *plr = new Player(3, 2);
 
   delete numptr;
   delete[] myarr;
@@ -490,7 +490,7 @@ bool is_sorted(double *array, int length);
 
 \begin{minted}{Cpp}
 int main() {
-  Player p = Player();
+  Player p = Player(3, 4);
 
   // Co dělá bin. operátor +=?
   // Zkracuje nám zápis nějáké funkce
@@ -498,7 +498,7 @@ int main() {
   // Může to být to samé jako
   // plusequals(p, 2)
 
-  // POZOR NA PRIORITĚ OPERACÍ
+  // POZOR NA PRIORITU OPERACÍ
   // (* má větší prioritu než +,
   // i když jejich chování prohodíme)
 }
@@ -513,7 +513,7 @@ int main() {
 class Player {
   ...
   Player &operator +=(unsigned int amount) {
-    this.heal(amount);
+    this->heal(amount);
     return *this;
   }
   bool operator +=(const Player &other) const {
