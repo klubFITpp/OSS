@@ -1,0 +1,566 @@
+\documentclass[aspectratio=1610]{beamer}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{fitpptemplate}
+
+\addbibresource{sources.bib}
+
+\title{PA2: Jak své programování orientovat na objekty}
+\subtitle{\href{https://github.com/klubfitpp/oss}{https://github.com/klubfitpp/oss}}
+\author{Klub FIT++}
+\date{2026}
+
+\begin{document}
+
+\maketitle
+
+\section{PA2 naruby}
+
+\begin{frame}{Co je jazyk C?}
+
+
+\begin{itemize}
+  \item Paradigmata
+    \begin{itemize}
+      \item Funkcionální (hlavním stavebním blokem C jsou funkce)
+      \item Imperativní (popisujeme jak se co dělá, ne čeho chceme docílit)
+      \item Procedurální (program rozdělujeme do procedur - funkcí - které se spouští v pořadí)\cite{geeks:procedural_language}
+    \end{itemize}
+  \item Relativně jednoduchý jazyk
+    \begin{itemize}
+      \item Hot take: vše je číslo, pole čísel, nebo n-tice čísel a polí
+      \item Máme pár aritmetických / logických operací
+      \item if/for/while na ovládání běhu
+      \item Vše ostatní vychází z fungování OS/paměti (schováno ve funkcích)
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Co tedy C++}
+
+\begin{itemize}
+  \item Prakticky rozšíření C (většinově funkční C je funkční C++)
+  \item Drasticky komplikovanější (třídy, templates, exceptions, přetěžování, reference)
+  \item C++ má vlastní ISO standard\cite{isocpp:n4860} - skoro 2000 stránek
+  \item Paradigma Objektově Orientované Programování (OOP)
+\end{itemize}
+
+\end{frame}
+
+\section{OOP}
+
+\begin{frame}{Definujme si problém}
+
+\begin{itemize}
+  \item Řekněme, že tvoříme hru, potřebujeme uchovávat hráče
+  \item Má počet životů (0 - 3), damage: 0 - inf, stav:
+    \begin{itemize}
+      \item Jumping
+      \item Swimming
+      \item OnGround
+    \end{itemize}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Kód v C}
+
+  \begin{columns}
+    \begin{column}{0.35\textwidth}
+
+      \begin{minted}{C}
+      typedef enum {
+        JUMPING,
+        SWIMMING,
+        ON_GROUND,
+      } player_state_t;
+
+      typedef struct {
+        char *name;
+        unsigned int health;
+        unsigned int damage;
+        player_state_t state;
+      } player_t;
+      \end{minted}
+    \end{column}
+    \begin{column}{0.75\textwidth}
+
+        \pause
+        \begin{minted}{C}
+        int main() {
+          player_t player;
+          // What is player.health?...
+
+          return 0;
+        }
+        \end{minted}
+
+        \begin{minted}{C}
+        int main() {
+          player_t player = {0};
+          // Player with 0 health??
+
+          return 0;
+        }
+        \end{minted}
+
+    \end{column}
+
+  \end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{Řešení v C}
+
+\begin{minted}[fontsize=\small]{C}
+
+int create_player(player_t *player) {
+  player.name = malloc(...);
+  player.health = 3;
+  player.damage = 5;
+  player.state = ON_GROUND;
+
+  return 0;
+}
+
+void delete_player(player_t *player) {
+  free(player.name);
+  player.name = NULL;
+}
+
+\end{minted}
+
+\end{frame}
+
+
+\begin{frame}[fragile]{Řešení v C}
+
+\begin{minted}[fontsize=\small]{C}
+
+int main(int argc, char **argv) {
+  player_t player;
+  if (!create_player(&player)) {
+    fprintf(stderr, "Could not create player...");
+    return -1;
+  }
+
+  // Kdokoliv může rozbít náš předpoklad
+  player.health = UINT_MAX;
+
+  // Zároveň musíme volat delete před každým return
+  delete_player(&player);
+  return 0;
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Teď tedy k C++}
+
+\begin{columns}
+  \begin{column}{0.3\textwidth}
+  \begin{minted}[fontsize=\small]{Cpp}
+  enum PlayerState {
+    JUMPING,
+    SWIMMING,
+    ON_GROUND,
+  };
+
+  class Player {
+    char *name;
+    unsigned int health;
+    unsigned int damage;
+    player_state_t state;
+    public:
+    static Player create(); 
+    void del();
+  };
+  \end{minted}
+  \end{column}
+
+  \begin{column}{0.7\textwidth}
+
+
+    \begin{minted}[fontsize=\small]{Cpp}
+        static Player Player::create() {
+          Player player = Player{};
+          player.name = new char[5];
+          player.health = 3;
+          player.damage = 5;
+          player.state = ON_GROUND;
+
+          return player;
+        }
+        void Player::del() {
+          delete player.name;
+          player.name = nullptr;
+        }
+      \end{minted}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{Použití tříd}
+
+\begin{minted}{Cpp}
+
+int main() {
+  Player p = Player::create();
+
+  // 'health' is a private member of 'Player' (clang)
+  p.health = 0;
+
+  p.del();
+  return 0;
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Další funkce}
+
+\begin{minted}[fontsize=\small]{Cpp}
+
+class Player {
+  // ...
+  Player &heal(unsigned int amount) {
+    unsigned int newhealth = this->health + amount;
+    if (newhealth > 3) {
+      return;
+    }
+    if (newhealth == 0) {
+      printf("Player died!\n");
+    }
+
+    this->health = newhealth;
+    return *this;
+  }
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Čeho jsme dosáhli?}
+
+\begin{itemize}
+  \item Zapouzdřili jsme data o hráči do striktního rozhraní
+    \begin{itemize}
+      \item Omezili jsme, co za informace můžeme číst a jaké zapisovat
+    \end{itemize}
+  \item Abstrahovali jsme rozhraní pro vývojáře od toho, jaké datové typy používáme
+    \begin{itemize}
+      \item Jednoduše můžeme změnit health na např. \mintinline{Cpp}{char *}
+    \end{itemize}
+  \item Zajistili jsme si, že platí náš invariant (naše omezení životů atd.)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Co ale to mazání?}
+
+\begin{columns}
+
+  \begin{column}{0.5\textwidth}
+
+    \begin{minted}[fontsize=\small]{Cpp}
+      int main(int argc, char **argv) {
+        Player p = Player::create();
+
+        if (argc < 2) {
+          // chybi p.del();
+          return 1;
+        }
+        if (strcmp(argv[1], "Bob") != 0) {
+          // chybi p.del();
+          return 1;
+        }
+
+        p.del();
+        return 0;
+      }
+    \end{minted}
+  \end{column}
+
+  \pause
+
+  \begin{column}{0.5\textwidth}
+
+    \begin{minted}{Cpp}
+      int main() {
+        // This is working :(
+        Player player;
+      }
+    \end{minted}
+  \end{column}
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{RAII}
+
+\begin{itemize}
+  \item Resource Acquisition Is Initialization\footnote{Toto umí i C$^*$\cite{youtube:destructor_c}}\cite{cppreference:raii}
+  \item Kompilátor umí \enquote{mazat} lokální proměnné
+  \item Proč by neuměl místo mazání zavolat \texttt{del} (případně až po tom smazat)
+  \item To existuje - destruktor, je to funkce pojmenovaná \texttt{~Type} (\texttt{~Player})
+  \item Destruktor by neměl způsobovat chyby
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{RAII}
+
+\begin{minted}{Cpp}
+
+class Player {
+  ...
+  ~Player() {
+    delete this->name;
+    this->name = nullptr;
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Co jsou tedy ty konstruktory?}
+
+\begin{itemize}
+  \item Funkce, chovající se jako náš \texttt{create\_player}
+    \begin{itemize}
+      \item Je static = jejím \enquote{skrytým} argumentem není \texttt{Player}
+      \item Buď dojde k chybě, nebo vytvoří (a vrátí) náš objekt
+      \item Může mít víc variant, podle počtu argumentů (a jejich typů)
+    \end{itemize}
+  \item Pokud existuje konstruktor, je to jediný způsob, jak zvenčí vytvořit objekt
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Tvorba konstruktoru}
+
+\begin{minted}[fontsize=\small]{Cpp}
+
+class Player {
+  ...
+  Player(unsigned int hp, unsigned int dmg) {
+    if (health > 3) {
+      // TODO: fail
+    }
+
+    health = hp;
+    damage = dmg;
+    state = PlayerState::ON_GROUND;
+    name = new char[4];
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Použití konstruktoru}
+
+\begin{minted}{Cpp}
+int main() {
+  // No matching constructor for initialization of 'Player'
+  Player player1;
+  Player player2 = Player(3, 5);
+  Player player3(3, 5);
+
+  // Problematické: double free?
+  // Viz přednáška příští týden!
+  Player player4 = player2;
+
+  // Note: nemusíme mazat, volá se samo
+  return 0;
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{There is more}
+
+\begin{itemize}
+  \item Toto je jen začátek (OOP je hlavně o principu polymorfismu a dědičnosti - později v semestru)
+  \item Spoustu lidí vnímá tento základ jako OOP (jde jen o Abstrakci+Enkapsulaci)
+  \item Toto umí i některé funkcionální jazyky (namely Rust)
+  \item Ukažme si nyní více z C++
+\end{itemize}
+
+\end{frame}
+
+\section{Něco více k C++}
+
+\begin{frame}{Co dále v C++?}
+
+\begin{itemize}
+  \item Alokace (\texttt{new} keyword)
+  \item Přetěžování
+  \item \textit{Reference}
+  \item \textit{\texttt{unique\_ptr}}
+  \item \textit{Templates}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Alokace (\texttt{new} keyword)}
+
+\begin{itemize}
+  \item Chytřejší \texttt{malloc}
+    \begin{itemize}
+      \item Samo si spočítá velikost struktury (už žádná magie se \texttt{sizeof})
+      \item Zavolá konstruktor (buď `()`, nebo jak napíšeme v kódu)
+    \end{itemize}
+  \item Mazání pomocí \texttt{delete} (nemíchat s \texttt{free})
+\end{itemize}
+
+\begin{minted}[fontsize=\small]{Cpp}
+int main() {
+  int *numptr = new int(1);
+  int *myarr = new int[5]{1, 2, 3};
+  Player *plr = new Player();
+
+  delete numptr;
+  delete[] myarr;
+  delete plr;
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování funkcí}
+
+\begin{itemize}
+  \item Mějme funkci, která má např. nepovinný argument, měla by fungovat pro více datových typů
+  \item Jak na to v C
+\end{itemize}
+
+\begin{minted}{C}
+int fact2(int n, int accum);
+int fact(int n) {
+  return fact2(n, 1);
+}
+
+bool is_sorted_int(int *array, int length);
+bool is_sorted_double(double *array, int length);
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování funkcí}
+
+\begin{itemize}
+  \item C++ si umí poradit (do jména funkce tajně, komplikovaně, přidává datový typ a další informace)
+  \item Tento kód bude fungovat
+\end{itemize}
+
+\begin{minted}{Cpp}
+int fact(int n, int accum);
+int fact(int n) {
+  return fact(n, 1);
+}
+
+bool is_sorted(int *array, int length);
+bool is_sorted(double *array, int length);
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Přetěžování operátorů}
+
+\begin{itemize}
+  \item V matematice $+$ neznamená vždy $+$
+  \item LA1: Součet vektorů sčítá jejich prvky, chová se to malinko jinak
+  \item SAP: $+$ (logický or), $*$ (logický and)
+  \item PA2: \mintinline{Cpp}{std::cout << "Hello world!" << std::endl}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování operátorů}
+
+\begin{minted}{Cpp}
+int main() {
+  Player p = Player();
+
+  // Co dělá bin. operátor +=?
+  // Zkracuje nám zápis nějáké funkce
+  p += 2;
+  // Může to být to samé jako
+  // plusequals(p, 2)
+
+  // POZOR NA PRIORITĚ OPERACÍ
+  // (* má větší prioritu než +,
+  // i když jejich chování prohodíme)
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Definice přetížení operátoru}
+
+\begin{minted}{Cpp}
+
+class Player {
+  ...
+  Player &operator +=(unsigned int amount) {
+    this.heal(amount);
+    return *this;
+  }
+  bool operator +=(const Player &other) const {
+    if (name == other.name)
+      return true;
+    return false;
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Co za operátory jde přetížit}
+
+\begin{itemize}
+  \item Prakticky cokoliv
+  \item Co nejde přetížit? $.$, $::$, ternární operátor, pár dalších
+  \item Dokonce i \texttt{new} nebo \texttt{delete}, $=$ jdou přetížit
+  \item Pozor! Přetěžování může drasticky snížit čitelnost kódu
+
+  \item \mintinline{Cpp}{int a=1,b=2,c=3,d=4,e=5; a=b?c:d=e;}
+  \item \mintinline{Cpp}{(x.find(123))=5;}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reference}
+
+\begin{itemize}
+  \item "Omezený pointer"
+  \item zakazuje pointer aritmetiku (\mintinline{Cpp}{ptr[3]; ptr + 3;})
+  \item Pro lepší porozumění C++ lvalues, rvalues\cite{youtube:lvalue_rvalue}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{unique\_ptr}
+
+\begin{itemize}
+  \item Zaručuje, že existuje jen jeden pointer na data uvnitř
+  \item Volá \texttt{new} a \texttt{delete} v při tvorbě a mazání (podle RAII)
+  \item Detailněji příští týden na přednášce
+\end{itemize}
+
+\end{frame}
+
+\printbibliography
+
+\end{document}
