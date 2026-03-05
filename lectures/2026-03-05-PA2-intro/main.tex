@@ -19,6 +19,7 @@
 
 \begin{frame}{Co je jazyk C?}
 
+
 \begin{itemize}
   \item Paradigmata
     \begin{itemize}
@@ -113,7 +114,7 @@
 
 \begin{frame}[fragile]{Řešení v C}
 
-\begin{minted}{C}
+\begin{minted}[fontsize=\small]{C}
 
 int create_player(player_t *player) {
   player.name = malloc(...);
@@ -154,6 +155,257 @@ int main(int argc, char **argv) {
 }
 
 \end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Teď tedy k C++}
+
+\begin{columns}
+  \begin{column}{0.3\textwidth}
+  \begin{minted}[fontsize=\small]{Cpp}
+  enum PlayerState {
+    JUMPING,
+    SWIMMING,
+    ON_GROUND,
+  };
+
+  class Player {
+    char *name;
+    unsigned int health;
+    unsigned int damage;
+    player_state_t state;
+    public:
+    static Player create(); 
+    void del();
+  };
+  \end{minted}
+  \end{column}
+
+  \begin{column}{0.7\textwidth}
+
+
+    \begin{minted}[fontsize=\small]{Cpp}
+        static Player Player::create() {
+          Player player = Player{};
+          player.name = new char[5];
+          player.health = 3;
+          player.damage = 5;
+          player.state = ON_GROUND;
+
+          return player;
+        }
+        void Player::del() {
+          delete player.name;
+          player.name = nullptr;
+        }
+      \end{minted}
+  \end{column}
+\end{columns}
+
+\end{frame}
+
+\begin{frame}[fragile]{Použití tříd}
+
+\begin{minted}{Cpp}
+
+int main() {
+  Player p = Player::create();
+
+  // 'health' is a private member of 'Player' (clang)
+  p.health = 0;
+
+  p.del();
+  return 0;
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Další funkce}
+
+\begin{minted}[fontsize=\small]{Cpp}
+
+class Player {
+  // ...
+  Player &heal(unsigned int amount) {
+    unsigned int newhealth = this->health + amount;
+    if (newhealth > 3) {
+      return;
+    }
+    if (newhealth == 0) {
+      printf("Player died!\n");
+    }
+
+    this->health = newhealth;
+    return *this;
+  }
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Čeho jsme dosáhli?}
+
+\begin{itemize}
+  \item Zapouzdřili jsme data o hráči do striktního rozhraní
+    \begin{itemize}
+      \item Omezili jsme, co za informace můžeme číst a jaké zapisovat
+    \end{itemize}
+  \item Abstrahovali jsme rozhraní pro vývojáře od toho, jaké datové typy používáme
+    \begin{itemize}
+      \item Jednoduše můžeme změnit health na např. \mintinline{Cpp}{char *}
+    \end{itemize}
+  \item Zajistili jsme si, že platí náš invariant (naše omezení životů atd.)
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Co ale to mazání?}
+
+\begin{columns}
+
+  \begin{column}{0.5\textwidth}
+
+    \begin{minted}[fontsize=\small]{Cpp}
+      int main(int argc, char **argv) {
+        Player p = Player::create();
+
+        if (argc < 2) {
+          // chybi p.del();
+          return 1;
+        }
+        if (strcmp(argv[1], "Bob") != 0) {
+          // chybi p.del();
+          return 1;
+        }
+
+        p.del();
+        return 0;
+      }
+    \end{minted}
+  \end{column}
+
+  \pause
+
+  \begin{column}{0.5\textwidth}
+
+    \begin{minted}{Cpp}
+      int main() {
+        // This is working :(
+        Player player;
+      }
+    \end{minted}
+  \end{column}
+
+\end{columns}
+
+\end{frame}
+
+\begin{frame}{RAII}
+
+\begin{itemize}
+  \item Resource Acquisition Is Initialization\footnote{Toto umí i C$^*$\cite{youtube:destructor_c}}\cite{cppreference:raii}
+  \item Kompilátor umí \enquote{mazat} lokální proměnné
+  \item Proč by neuměl místo mazání zavolat \texttt{del} (případně až po tom smazat)
+  \item To existuje - destruktor, je to funkce pojmenovaná \texttt{~Type} (\texttt{~Player})
+  \item Destruktor by neměl způsobovat chyby
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{RAII}
+
+\begin{minted}{Cpp}
+
+class Player {
+  ...
+  ~Player() {
+    delete this->name;
+    this->name = nullptr;
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Co jsou tedy ty konstruktory?}
+
+\begin{itemize}
+  \item Funkce, chovající se jako náš \texttt{create\_player}
+    \begin{itemize}
+      \item Je static = jejím \enquote{skrytým} argumentem není \texttt{Player}
+      \item Buď dojde k chybě, nebo vytvoří (a vrátí) náš objekt
+      \item Může mít víc variant, podle počtu argumentů (a jejich typů)
+    \end{itemize}
+  \item Pokud existuje konstruktor, je to jediný způsob, jak zvenčí vytvořit objekt
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Tvorba konstruktoru}
+
+\begin{minted}[fontsize=\small]{Cpp}
+
+class Player {
+  ...
+  Player(unsigned int hp, unsigned int dmg) {
+    if (health > 3) {
+      // TODO: fail
+    }
+
+    health = hp;
+    damage = dmg;
+    state = PlayerState::ON_GROUND;
+    name = new char[4];
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Použití konstruktoru}
+
+\begin{minted}{Cpp}
+int main() {
+  // No matching constructor for initialization of 'Player'
+  Player player1;
+  Player player2 = Player(3, 5);
+  Player player3(3, 5);
+
+  // Problematické: double free?
+  Player player4 = player2;
+
+  // Note: nemusíme mazat, volá se samo
+  return 0;
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{There is more}
+
+\begin{itemize}
+  \item Toto je jen začátek (OOP je hlavně o principu polymorfismu a dědičnosti - později v semestru)
+  \item Spoustu lidí vnímá tento základ jako OOP (jde jen o Abstrakci+Enkapsulaci)
+  \item Toto umí i některé funkcionální jazyky (namely Rust)
+  \item Ukažme si nyní více z C++
+\end{itemize}
+
+\end{frame}
+
+\section{Něco více k C++}
+
+\begin{frame}
+
+\begin{itemize}
+  \item \texttt{unique\_ptr}
+  \item Alokace (\texttt{new} keyword)
+  \item Reference
+  \item Templates
+\end{itemize}
 
 \end{frame}
 
