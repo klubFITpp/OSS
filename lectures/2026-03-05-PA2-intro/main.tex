@@ -8,6 +8,7 @@
 \addbibresource{sources.bib}
 
 \title{PA2: Jak své programování orientovat na objekty}
+\subtitle{\href{https://github.com/klubfitpp/oss}{https://github.com/klubfitpp/oss}}
 \author{Klub FIT++}
 \date{2026}
 
@@ -376,6 +377,7 @@ int main() {
   Player player3(3, 5);
 
   // Problematické: double free?
+  // Viz přednáška příští týden!
   Player player4 = player2;
 
   // Note: nemusíme mazat, volá se samo
@@ -398,13 +400,163 @@ int main() {
 
 \section{Něco více k C++}
 
-\begin{frame}
+\begin{frame}{Co dále v C++?}
 
 \begin{itemize}
-  \item \texttt{unique\_ptr}
   \item Alokace (\texttt{new} keyword)
-  \item Reference
-  \item Templates
+  \item Přetěžování
+  \item \textit{Reference}
+  \item \textit{\texttt{unique\_ptr}}
+  \item \textit{Templates}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Alokace (\texttt{new} keyword)}
+
+\begin{itemize}
+  \item Chytřejší \texttt{malloc}
+    \begin{itemize}
+      \item Samo si spočítá velikost struktury (už žádná magie se \texttt{sizeof})
+      \item Zavolá konstruktor (buď `()`, nebo jak napíšeme v kódu)
+    \end{itemize}
+  \item Mazání pomocí \texttt{delete} (nemíchat s \texttt{free})
+\end{itemize}
+
+\begin{minted}[fontsize=\small]{Cpp}
+int main() {
+  int *numptr = new int(1);
+  int *myarr = new int[5]{1, 2, 3};
+  Player *plr = new Player();
+
+  delete numptr;
+  delete[] myarr;
+  delete plr;
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování funkcí}
+
+\begin{itemize}
+  \item Mějme funkci, která má např. nepovinný argument, měla by fungovat pro více datových typů
+  \item Jak na to v C
+\end{itemize}
+
+\begin{minted}{C}
+int fact2(int n, int accum);
+int fact(int n) {
+  return fact2(n, 1);
+}
+
+bool is_sorted_int(int *array, int length);
+bool is_sorted_double(double *array, int length);
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování funkcí}
+
+\begin{itemize}
+  \item C++ si umí poradit (do jména funkce tajně, komplikovaně, přidává datový typ a další informace)
+  \item Tento kód bude fungovat
+\end{itemize}
+
+\begin{minted}{Cpp}
+int fact(int n, int accum);
+int fact(int n) {
+  return fact(n, 1);
+}
+
+bool is_sorted(int *array, int length);
+bool is_sorted(double *array, int length);
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Přetěžování operátorů}
+
+\begin{itemize}
+  \item V matematice $+$ neznamená vždy $+$
+  \item LA1: Součet vektorů sčítá jejich prvky, chová se to malinko jinak
+  \item SAP: $+$ (logický or), $*$ (logický and)
+  \item PA2: \mintinline{Cpp}{std::cout << "Hello world!" << std::endl}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Přetěžování operátorů}
+
+\begin{minted}{Cpp}
+int main() {
+  Player p = Player();
+
+  // Co dělá bin. operátor +=?
+  // Zkracuje nám zápis nějáké funkce
+  p += 2;
+  // Může to být to samé jako
+  // plusequals(p, 2)
+
+  // POZOR NA PRIORITĚ OPERACÍ
+  // (* má větší prioritu než +,
+  // i když jejich chování prohodíme)
+}
+\end{minted}
+
+\end{frame}
+
+\begin{frame}[fragile]{Definice přetížení operátoru}
+
+\begin{minted}{Cpp}
+
+class Player {
+  ...
+  Player &operator +=(unsigned int amount) {
+    this.heal(amount);
+    return *this;
+  }
+  bool operator +=(const Player &other) const {
+    if (name == other.name)
+      return true;
+    return false;
+  }
+}
+
+\end{minted}
+
+\end{frame}
+
+\begin{frame}{Co za operátory jde přetížit}
+
+\begin{itemize}
+  \item Prakticky cokoliv
+  \item Co nejde přetížit? $.$, $::$, ternární operátor, pár dalších
+  \item Dokonce i \texttt{new} nebo \texttt{delete}, $=$ jdou přetížit
+  \item Pozor! Přetěžování může drasticky snížit čitelnost kódu
+
+  \item \mintinline{Cpp}{int a=1,b=2,c=3,d=4,e=5; a=b?c:d=e;}
+  \item \mintinline{Cpp}{(x.find(123))=5;}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Reference}
+
+\begin{itemize}
+  \item "Omezený pointer"
+  \item zakazuje pointer aritmetiku (\mintinline{Cpp}{ptr[3]; ptr + 3;})
+  \item Pro lepší porozumění C++ lvalues, rvalues\cite{youtube:lvalue_rvalue}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{unique\_ptr}
+
+\begin{itemize}
+  \item Zaručuje, že existuje jen jeden pointer na data uvnitř
+  \item Volá \texttt{new} a \texttt{delete} v při tvorbě a mazání (podle RAII)
+  \item Detailněji příští týden na přednášce
 \end{itemize}
 
 \end{frame}
